@@ -116,7 +116,7 @@ consumido pela aplicação.
 ```bash
 streamlit run app/streamlit_app.py
 ```
-Aplicação publicada: (inserir a URL do Community Cloud após o deploy)
+Aplicação publicada: (https://datathonfiap2026-4lubiyv3dzudlpin7efktm.streamlit.app/)
 Para ambientes conda: `conda env create -f environment.yml && conda activate passos-datathon`
 ---
 Estrutura do repositório
