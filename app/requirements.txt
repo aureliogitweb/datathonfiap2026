@@ -1,0 +1,7 @@
+# Versoes fixas: joblib nao garante compatibilidade entre versoes de sklearn.
+# Se o artefato for regerado, atualizar scikit-learn aqui para a mesma versao.
+streamlit==1.41.1
+scikit-learn==1.8.0
+pandas==2.2.3
+numpy==2.1.3
+joblib==1.4.2

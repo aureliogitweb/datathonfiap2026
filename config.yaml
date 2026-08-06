@@ -1,0 +1,34 @@
+# Configuração central. Alterar aqui, nunca dentro de notebook.
+
+seed: 42
+
+paths:
+  raw: "data/raw/BASE_DE_DADOS_PEDE_2024_-_DATATHON.xlsx"
+  interim: "data/interim"
+  processed: "data/processed"
+  figures: "reports/figures"
+  artifacts: "app/artifacts"
+
+dados:
+  anos: [2022, 2023, 2024]
+  # Anos em que cada coluna tem dado real. Fora disso vem vazia.
+  cobertura_parcial:
+    ipp: [2023, 2024]
+    atingiu_pv: [2022]
+    rec_psicologia: [2022]
+    indicado_bolsa: [2022]
+    cg: [2022]
+    escola: [2024]
+
+alvo:
+  nome: "alvo_piora"
+  definicao: "defasagem(t+1) < defasagem(t)"
+  ano_treino: 2022     # transicao 2022->2023
+  ano_teste: 2023      # transicao 2023->2024
+  estrato: "bloco_fase_ideal"
+
+validacao:
+  # 2 linhas de 2024 violam defasagem = fase - fase_ideal. Conhecidas.
+  max_violacoes_defasagem: 2
+  faixa_indicadores: [0.0, 10.1]   # IAA 2024 estoura 10 (ver notebook 01)
+  faixa_inde: [2.0, 10.0]

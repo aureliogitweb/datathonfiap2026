@@ -1,0 +1,7 @@
+indicador,n,med_2022,med_2023,med_2024,amplitude,p_friedman,veredito
+iaa,332,9.0,8.8,8.75,0.25,0.11787553377874081,estavel
+ieg,332,8.9,9.1,8.68,0.42,3.0876565994717025e-07,estavel
+ips,332,7.5,5.0,7.51,2.51,5.72728201736949e-14,DRIFT (padrao em V)
+ida,332,7.1,6.9,6.75,0.35,0.01665238502823433,estavel
+ipv,332,7.56,8.17,7.5,0.67,2.311278080517533e-26,DRIFT (padrao em V)
+defasagem,332,-1.0,-1.0,0.0,1.0,1.3897657491897743e-37,MUDANCA REAL (monotonica)

@@ -1,0 +1,36 @@
+# Dados — nao versionar (pertencem a Associacao Passos Magicos)
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.xlsx
+*.xls
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Ambiente
+.env
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Streamlit — segredos nunca vao para o repo
+.streamlit/secrets.toml
+
+# Excecao: o artefato do modelo PRECISA ir (3.8 KB, sem dado individual)
+!app/artifacts/modelo_risco.joblib

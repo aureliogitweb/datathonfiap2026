@@ -1,0 +1,21 @@
+﻿id,hipotese,veredito,evidencia,consequencia
+H1,IAN e medida independente da defasagem,REFUTADA,Mapeamento deterministico 10/5/2.5; defasagem=fase-fase_ideal em 99.93%,IAN/INDE/Pedra proibidos como feature; P6 reformulada
+H2,Risco concentra-se nas fases iniciais,CONFIRMADA,"43.8% e 48.0% vs 10.2% e 8.4%, replicado em 2 janelas",Estratificacao obrigatoria na avaliacao
+H3,O gradiente da H2 e artefato da mudanca de regua,REFUTADA,Padrao identico na janela com regua estavel,"Fenomeno real, nao artefato"
+H4,Risco vem do descompasso promocao PM x ano escolar,ENCERRADA,Exige ano escolar do aluno; nao existe na base,Recomendacao qualitativa apenas
+H5,IEG antecede IDA alem do proprio IDA,CONFIRMADA,coef 0.857 t=4.54 p=5.7e-06; R2 0.2665->0.2801,Engajamento e alavanca acionavel
+H6,IPS antecede queda de desempenho E engajamento,PARCIAL,IDA: t=4.36 p=1e-05 SIM | IEG: t=1.67 p=0.09 NAO,P5 respondida com ressalva
+H7,IAA descola do desempenho nos extremos,CONFIRMADA,IAA 8.50 (IDA 3.54) vs 8.92 (IDA 8.85); rho=0.135,Justifica busca ativa: aluno fraco nao se percebe
+H8,Evasao tem preditores distintos de defasagem,CONFIRMADA,IEG e o mais forte p/ evasao (p=7e-14) e nulo p/ defasagem (AUC 0.523),Dois sistemas de alerta separados
+H9,Programa recupera defasagem e melhorou,CONFIRMADA,Manski: pior caso 21.5%->30.9% (+9.4pp) vs +10.1pp observado,Argumento de efetividade robusto a sobrevivencia
+H10,Indicadores mudaram de metodo (drift geral),REVISADA,So IPS (7.5/5.0/7.5) e IPV (moderado). IAA/IEG/IDA estaveis,Percentil intra-ano p/ IPS e IPV
+H11,"Zeros sao missing em IAA, IEG e IDA",REVISADA,So IAA tem gap (0->1.7) e nao-persistencia. IEG/IDA sao continuos,"Regra por indicador, nao uniforme"
+H12,Perfil de defasagem melhorou,CONFIRMADA,Coorte fechada: adequado 32.7%->65.2%; Wilcoxon p=7.5e-35,Resposta P1
+H13,IPP agrega informacao sobre risco futuro,CONFIRMADA,R2 0.1334->0.2092 (+57%); corr com defasagem so 0.191,Recomendacao: garantir IPP em todos os ciclos
+H14,INDE e combinacao linear dos 7 indicadores,CONFIRMADA,R2=1.000000; pesos .20 IEG/IDA/IPV e .10 IAA/IPS/IPP/IAN,P8 e algebra; contribuicao = peso x dispersao
+H15,IEG e IDA movem o IPV,CONFIRMADA,"IEG t=6.02, IDA t=5.31; IPS e IAA nao significantes",Resposta P7
+H16,Modelo supera baseline trivial de fase,PENDENTE,Passo 7,-
+H17,Ausencia de avaliacao prediz piora,REFUTADA,"12.5% vs 17.7%, Fisher p=0.326, sinal invertido",Feature descartada; hipotese minha desde o Passo 2
+H18,Efeito Mateus: programa beneficia mais quem ja estava bem,INDICIO,Ametista +1.35 vs Quartzo +0.30 partindo da mesma defasagem -2,n de Quartzo pequeno (30); reportar com cautela
+H19,IDA melhora por fase e cai por aluno (Simpson),CONFIRMADA,Por fase +0.18 a +0.84; coorte fechada 6.68->6.21 (p=0.0016),P2 exige resposta dupla
+H20,Queda de engajamento antecede evasao,CONFIRMADA,"IEG 8.23 (evadiu) vs 8.86 (ficou), p=7e-14",Modelo secundario de evasao
