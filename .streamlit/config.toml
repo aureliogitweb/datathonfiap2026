@@ -1,0 +1,12 @@
+[theme]
+primaryColor = "#c0392b"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6f8"
+textColor = "#1a1a1a"
+
+[server]
+maxUploadSize = 5          # CSV de turma nao passa disso; limita abuso
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
