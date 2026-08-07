@@ -304,9 +304,11 @@ with aba1:
             "da média na fase inicial.",
             icon="💡",
         )
+        # Sem background_gradient: ele exige matplotlib, que nao esta no
+        # requirements do app e falha no Community Cloud. A coluna de
+        # classificacao ja comunica a urgencia sem depender de cor.
         st.dataframe(
-            out.style.format({"risco": "{:.1%}"})
-               .background_gradient("Reds", subset=["risco"]),
+            out.style.format({"risco": "{:.1%}"}),
             use_container_width=True, hide_index=True)
         st.download_button("⬇️ Baixar lista priorizada",
                            out.to_csv(index=False).encode("utf-8-sig"),
