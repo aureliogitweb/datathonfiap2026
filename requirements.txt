@@ -1,3 +1,16 @@
+# Dependencias da aplicacao publicada no Streamlit Community Cloud.
+# Deliberadamente minimo: o ambiente tem cerca de 1 GB de memoria, e cada
+# pacote a mais aumenta o tempo de construcao e o risco de falha.
+#
+# O app importa apenas joblib, numpy, pandas e streamlit. O scikit-learn
+# entra porque o pipeline serializado depende dele para ser carregado.
+#
+# ATENCAO ao adicionar recursos: uma funcao pode exigir biblioteca que nao
+# aparece nos imports. O Styler.background_gradient do pandas, por exemplo,
+# exige matplotlib em tempo de execucao e quebrou a aplicacao em producao
+# mesmo com o requirements aparentemente correto. Teste sempre no Cloud,
+# nao apenas na maquina local, onde essas bibliotecas ja estao instaladas.
+
 # Compativel com Python 3.11 e 3.12.
 # Faixas em vez de pinos exatos: xgboost 3.3+ exige Python >= 3.12 e
 # quebraria a instalacao em 3.11. Testado nas duas versoes — resultados
@@ -8,9 +21,9 @@ pandas>=2.2,<3
 numpy>=1.26,<3
 scipy>=1.11
 
-# PINADO: o artefato app/artifacts/modelo_risco.joblib foi serializado
-# com esta versao. Se alterar aqui, rode o notebook 03 ate o fim para
-# regerar o .joblib — senao o app falha ao carregar.
+# PIN: versao que serializou app/artifacts/modelo_risco.joblib.
+# Alterar aqui exige regerar o artefato pelo notebook 03, senao o
+# carregamento falha em producao com mensagem pouco informativa.
 scikit-learn==1.8.0
 
 # Modelos challenger (comparacao no notebook 03)
@@ -31,5 +44,5 @@ pyarrow>=14          # opcional: sem ele, salvar() cai para CSV
 jupyterlab>=4
 ipykernel>=6
 
-# App (ver tambem app/requirements.txt, usado no deploy)
+# App
 streamlit>=1.30

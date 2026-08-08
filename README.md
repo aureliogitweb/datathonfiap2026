@@ -1,105 +1,129 @@
-# Datathon Passos Mágicos: previsão do risco de agravamento da defasagem
+# Datathon Passos Mágicos: risco de agravamento de defasagem
 
-Neste trabalho analisei os dados da Pesquisa Extensiva do Desenvolvimento Educacional (PEDE) da Associação Passos Mágicos, referentes aos anos de 2022, 2023 e 2024. O objetivo foi entender a evolução dos alunos ao longo do programa, responder às perguntas propostas no desafio e desenvolver um modelo capaz de estimar a probabilidade de um aluno apresentar agravamento da defasagem, além de disponibilizar essa previsão em uma aplicação para apoiar a equipe pedagógica.
+Análise de três ciclos da Pesquisa Extensiva do Desenvolvimento Educacional
+(PEDE 2022 a 2024) da [Associação Passos Mágicos](https://passosmagicos.org.br/),
+com modelo preditivo de risco e uma aplicação.
 
-A base utilizada contém informações de **1.661 alunos**, totalizando **3.030 registros aluno/ano** e **1.365 transições** entre um ano e outro.
+**1.661 alunos, 3.030 observações aluno/ano, 1.365 transições.**
 
-## Principais resultados
+**Aplicação publicada:** _(colar aqui a URL do Streamlit Cloud)_
 
-1. O programa apresenta resultados positivos, mesmo em um cenário conservador
+---
 
-Entre os **468 alunos que participaram dos três anos analisados**, a proporção de estudantes classificados no nível adequado passou de **32,7% para 65,2%**. Individualmente, **58,8% dos alunos melhoraram**, enquanto **10,3% apresentaram piora**.
+## Os cinco achados
 
-Também testei um cenário bastante conservador utilizando os limites de Manski, assumindo que todos os **509 alunos que deixaram o programa** tivessem piorado. Mesmo nessa hipótese extrema, a melhora entre os ciclos continua aparecendo. A evolução mínima estimada foi de **9,4 pontos percentuais**, muito próxima dos **10,1 pontos** observados na base original. Além disso, o limite inferior do segundo ciclo (**30,9%**) ainda supera o resultado observado no primeiro (**30,8%**).
+### 1. O programa funciona, e o resultado aguenta o teste mais duro
 
-Esses resultados reforçam que a melhora observada não depende apenas dos alunos que permaneceram no programa.
+Entre os 468 alunos presentes nos três anos, a proporção em nível adequado
+dobrou: passou de 32,7% para 65,2%. Olhando aluno por aluno, 58,8% melhoraram
+e 10,3% pioraram.
 
+O que torna isso defensável não é o número em si, mas o que ele resiste.
+Apliquei os limites de Manski, ou seja, refiz a conta assumindo que
+todos os 509 alunos que saíram do programa tivessem piorado. Mesmo nesse
+cenário impossível de ser pior, a melhora entre ciclos continua em 9,4 pontos,
+contra 10,1 observados. O piso do segundo ciclo (30,9%) já supera o resultado
+efetivo do primeiro (30,8%).
 
+### 2. O IAN não mede o que o nome sugere
 
-2. O IAN não representa exatamente o que seu nome sugere
+O Indicador de Adequação ao Nível não é uma avaliação. Ele é a defasagem
+recodificada em 10, 5 ou 2,5, num mapeamento fixo. E a defasagem, por sua vez,
+é só `Fase menos Fase Ideal`, o que confere em 99,93% das linhas.
 
-Ao analisar o Indicador de Adequação ao Nível (IAN), percebi que ele não é um indicador construído a partir de uma avaliação independente. Na prática, ele é apenas uma recodificação da defasagem em três valores possíveis (10, 5 e 2,5).
+Indo mais fundo: 98,7% das pioras têm a mesma assinatura. O aluno ficou na
+mesma fase enquanto a fase ideal avançou. Quem não é promovido piora em cerca
+de 53% dos casos. Quem é promovido, em 0,3%.
 
-Além disso, a própria defasagem corresponde quase exatamente ao cálculo entre a **fase atual** e a **fase ideal**, coincidindo em **99,93% dos registros**.
+Ou seja, o que a base chama de risco de defasagem é descompasso entre o
+calendário da Passos Mágicos e o calendário escolar. Não é reprovação nem
+queda de desempenho, e os dois fenômenos se mostraram praticamente
+independentes.
 
-Quando aprofundei essa análise, encontrei um padrão bastante claro: **98,7% das pioras** aconteceram porque o aluno permaneceu na mesma fase enquanto a fase ideal avançou naturalmente com o tempo.
+### 3. Quem mais precisa de ajuda não sabe que precisa
 
-Entre os alunos que não foram promovidos de fase, aproximadamente **53% pioraram**. Já entre os promovidos, apenas **0,3%** apresentaram piora.
+| Quintil de desempenho | IDA real | Autoavaliação |
+|---|---|---|
+| 1 (o mais baixo) | 3,54 | 8,50 |
+| 5 (o mais alto) | 8,85 | 8,92 |
 
-Na prática, isso indica que o chamado "risco de defasagem" representa muito mais um desalinhamento entre a progressão esperada pelo programa e a progressão escolar do que uma queda real de desempenho acadêmico.
+A correlação entre os dois é de apenas 0,135. Alunos com desempenho 3,54 se
+avaliam praticamente igual aos de 8,85.
 
+Isso tem consequência prática direta: um programa que espera o aluno pedir
+ajuda nunca vai alcançar o quintil de baixo. A busca precisa ser ativa.
 
-### 3. Os alunos com menor desempenho tendem a superestimar seus próprios resultados
+### 4. A evasão é o problema mais grave, e dá para prever
 
-Ao comparar a autoavaliação dos alunos (IAA) com o desempenho acadêmico (IDA), encontrei uma relação muito fraca.
+Entre 25% e 30% dos alunos saem por ano. Em todo o painel, só 4 voltaram
+depois de sumir. Na prática, quem sai não volta.
 
-| Quintil          | IDA médio | Autoavaliação |
-| ---------------- | --------: | ------------: |
-| Menor desempenho |      3,54 |          8,50 |
-| Maior desempenho |      8,85 |          8,92 |
+| Indicador | Prediz evasão | Prediz defasagem |
+|---|---|---|
+| IEG (engajamento) | p = 7e-14, o mais forte de todos | AUC 0,523, ou seja, nada |
 
-A correlação de Spearman entre esses indicadores foi de apenas **0,135**, mostrando que alunos com baixo desempenho costumam avaliar seu próprio desempenho de forma bastante semelhante aos alunos com melhores resultados.
+São dois problemas diferentes e cada um precisa do seu próprio alerta. O
+enunciado pede só o segundo, que por acaso é o de sinal mais fraco.
 
-Isso sugere que estratégias baseadas apenas na procura espontânea por ajuda provavelmente deixam de alcançar justamente quem mais precisa de acompanhamento.
+### 5. O programa beneficia mais quem já estava melhor
 
+Partindo da mesma defasagem inicial de -2, alunos Ametista avançam 1,35 fase e
+alunos Quartzo avançam 0,30.
 
+Estou reportando como indício, não como conclusão fechada, porque são só 10 alunos
+Quartzo nesse recorte. Mas se confirmar, é o achado mais importante para o
+desenho do programa, já que contraria a missão de atender quem está em maior
+vulnerabilidade.
 
-### 4. A evasão é um problema diferente da defasagem
+---
 
-Entre **25% e 30% dos alunos deixam o programa a cada ano**, e praticamente não retornam. Em toda a base, apenas **quatro alunos** voltaram após um período de ausência.
+## O modelo
 
-Também observei que o **IEG (Indicador de Engajamento)** é um excelente preditor de evasão (p = 7 × 10⁻¹⁴), mas praticamente não consegue prever o agravamento da defasagem (AUC = 0,523).
+O que ele prevê: `defasagem(t+1) < defasagem(t)`, ou seja, se a defasagem
+do aluno vai piorar no ciclo seguinte. Acontece em 17,3% das transições, e a
+taxa é idêntica nas duas janelas, o que é importante para a validação fazer
+sentido.
 
-Esse resultado mostra que evasão e agravamento da defasagem são fenômenos diferentes e precisam ser tratados com estratégias de acompanhamento distintas.
+Como validamos: treinamos com as transições de 2022 para 2023 e testamos
+com as de 2023 para 2024. No ajuste de hiperparâmetros usamos GroupKFold por
+RA, porque 468 alunos aparecem nas duas janelas e um sorteio aleatório
+colocaria o mesmo aluno dos dois lados.
 
+| Modelo | PR-AUC | IC 95% | Brier | PR-AUC na fase avançada |
+|---|---|---|---|---|
+| Random Forest | 0,657 | [0,589; 0,725] | 0,152 | 0,262 |
+| XGBoost | 0,620 | [0,549; 0,694] | 0,100 | 0,234 |
+| **Regressão logística (escolhido)** | 0,557 | [0,489; 0,630] | **0,107** | **0,326** |
+| LightGBM | 0,525 | [0,452; 0,605] | 0,113 | 0,189 |
+| Árvore de decisão | 0,410 | [0,352; 0,482] | 0,125 | 0,181 |
+| Regra simples (só a fase) | 0,363 | [0,313; 0,422] | 0,116 | 0,084 |
 
+Por que a logística, se o Random Forest tem PR-AUC maior? Porque o número
+global engana. A taxa de eventos é 48,0% na fase inicial e 8,4% na avançada, e
+só separar esses dois grupos já produz PR-AUC alto sem prever nada de fato. No
+estrato de fase avançada, onde a regra de fase não ajuda e o modelo precisa
+trabalhar, a ordem se inverte e a logística lidera com 0,326.
 
-5. Os alunos que já apresentam melhores condições parecem aproveitar mais o programa
+Como os intervalos de confiança se sobrepõem, valeu o critério que acabei definindo
+antes de rodar: em empate estatístico, fica o mais simples e mais bem
+calibrado.
 
-Ao comparar alunos que iniciaram com a mesma defasagem (-2), observei que aqueles classificados como **Ametista** avançaram, em média, **1,35 fase**, enquanto os classificados como **Quartzo** avançaram apenas **0,30 fase**.
+Calibração. Brier de 0,107, com o previsto batendo com o observado em todos
+os quintis. Quando o modelo diz 30%, cerca de 30% realmente agravam. Isso
+importa porque o enunciado pede probabilidade, e a aplicação mostra um
+percentual para quem vai decidir onde colocar recurso.
 
-Esse comportamento é compatível com o chamado **efeito Mateus**, em que quem já possui melhores condições tende a aproveitar mais as oportunidades oferecidas.
+Ganho na prática. No estrato de fase avançada, olhando os 30 alunos de
+maior risco, o modelo captura 22,0% dos casos contra 6,0% da regra simples.
+São 3,7 vezes mais acertos com a mesma capacidade de atendimento.
 
-No entanto, esse resultado deve ser interpretado com cautela, pois a quantidade de alunos Quartzo acompanhados durante todo o período foi pequena (**30 casos**).
+O que mais protege é o IPV, com razão de chances de 0,46. Entre as coisas
+que a instituição pode influenciar, é a de maior efeito.
 
+---
 
-# Modelo preditivo
+## Como rodar
 
-O modelo foi desenvolvido para prever se um aluno apresentaria agravamento da defasagem entre um ciclo e o seguinte.
-
-O evento previsto foi definido como:
-
-> **defasagem(t+1) < defasagem(t)**
-
-Esse evento ocorreu em **17,3% das transições**, mantendo praticamente a mesma frequência nas duas janelas analisadas.
-
-Para evitar vazamento de dados, utilizei as transições de **2022→2023** para treinamento e **2023→2024** para teste. Durante a validação utilizei **GroupKFold**, agrupando os registros pelo RA, já que **468 alunos aparecem nas duas janelas** e uma divisão aleatória faria o mesmo aluno aparecer simultaneamente no treino e no teste.
-
-## Comparação dos modelos
-
-| Modelo                       | PR-AUC | Brier |
-| ---------------------------- | -----: | ----: |
-| Random Forest                |  0,657 | 0,152 |
-| XGBoost                      |  0,620 | 0,100 |
-| Regressão Logística          |  0,557 | 0,107 |
-| LightGBM                     |  0,525 | 0,113 |
-| Árvore de Decisão            |  0,410 | 0,125 |
-| Regra baseada apenas na fase |  0,363 | 0,116 |
-
-Embora o **Random Forest** tenha apresentado o maior PR-AUC geral, esse resultado é influenciado pela diferença na frequência de eventos entre as fases iniciais e avançadas.
-
-Quando avaliei apenas os alunos em fase avançada cenário em que a simples informação da fase deixa de ser suficiente  a **Regressão Logística** apresentou o melhor desempenho (**PR-AUC = 0,326**).
-
-Como os intervalos de confiança dos modelos se sobrepõem, utilizei o critério definido antes da modelagem: em caso de empate estatístico, priorizar o modelo mais simples, mais interpretável e melhor calibrado.
-
-Também avaliei a calibração do modelo por meio do índice de **Brier (0,107)**. Os valores previstos ficaram próximos dos valores observados em todos os níveis de risco. Na prática, isso significa que, entre alunos com probabilidade prevista de aproximadamente **30%**, cerca de **30% realmente apresentaram agravamento da defasagem**, tornando as probabilidades úteis para apoiar a tomada de decisão da equipe pedagógica.
-
-Considerando apenas os alunos em fase avançada, selecionar os **30 estudantes com maior risco previsto** permitiu identificar **3,7 vezes mais casos** do que uma regra simples baseada apenas na fase.
-
-Entre todas as variáveis analisadas, o **IPV** foi o principal fator de proteção, apresentando uma razão de chances de **0,46**. Além de ter o maior impacto observado, é um indicador sobre o qual a instituição pode atuar diretamente, tornando-se um dos principais pontos de atenção para futuras intervenções.
-
-
-Como executar
 ```bash
 git clone <url-do-repositorio>
 cd passos-magicos-datathon
@@ -107,95 +131,137 @@ cd passos-magicos-datathon
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-# coloque a planilha PEDE em data/raw/. O nome do arquivo não importa,
-# pois o carregador localiza qualquer arquivo .xlsx presente na pasta.
+# coloque a planilha PEDE em data/raw/. O nome não importa, porque o
+# carregador acha qualquer .xlsx que estiver na pasta.
 jupyter lab
 ```
-Execute os notebooks na ordem 01, 02 e 03. O terceiro gera o arquivo do modelo
-consumido pela aplicação.
+
+Rode os notebooks na ordem 01, 02 e 03. O terceiro gera o arquivo do modelo que
+a aplicação usa.
+
 ```bash
 streamlit run app/streamlit_app.py
 ```
-Aplicação publicada: (https://datathonfiap2026-4lubiyv3dzudlpin7efktm.streamlit.app/)
-Para ambientes conda: `conda env create -f environment.yml && conda activate passos-datathon`
+
+Para testar o modo em lote sem montar planilha, envie o `app/exemplo_turma.csv`. 
+Há um arquivo gerado de exemplo nessa pasta, pode utilizar ele se quiser.
+São 18 alunos fictícios com risco entre 0,8% e 47,3%.
+
+Com anaconda: `conda env create -f environment.yml && conda activate passos-datathon`
+
 ---
-Estrutura do repositório
+
+## Estrutura do repositório
+
 ```
 passos-magicos-datathon/
 ├── README.md
 ├── LICENSE
 ├── requirements.txt
 ├── environment.yml
-├── config.yaml                     
+├── config.yaml                      # semente, caminhos e faixas de validação
 ├── .gitignore
 │
 ├── data/
-│   ├── raw/                         
-│   ├── interim/                    
+│   ├── raw/                         # planilha original (não versionada)
+│   ├── interim/                     # painel limpo e log de limpeza
 │   └── processed/
 │
 ├── notebooks/
-│   ├── 01_qualidade_dados.ipynb     # auditoria de drift, zeros e contratos
+│   ├── 01_qualidade_dados.ipynb     # auditoria: drift, zeros, contratos
 │   ├── 02_eda_perguntas.ipynb       # as 11 perguntas do enunciado
-│   └── 03_modelo_risco.ipynb        # entregável principal do modelo
+│   └── 03_modelo_risco.ipynb        # entregável do modelo
 │
 ├── src/
 │   ├── data/
-│   │   ├── load.py                  
-│   │   ├── clean.py                 
-│   │   └── validate.py              
-│   ├── features/build.py            
+│   │   ├── load.py                  # junta as 3 abas num painel longo
+│   │   ├── clean.py                 # limpeza com log auditável
+│   │   └── validate.py              # contratos que falham cedo
+│   ├── features/build.py            # variáveis e verificação de vazamento
 │   ├── models/
 │   │   ├── train.py                 # pipelines dos cinco modelos
-│   │   └── evaluate.py              # PR-AUC, calibração e recall por faixa
-│   └── analysis/eda_tecnica.py      # drift, VIF, deslocamento e fluxo
+│   │   └── evaluate.py              # PR-AUC, calibração, recall por faixa
+│   └── analysis/eda_tecnica.py      # drift, VIF, shift, fluxo do painel
 │
 ├── app/
 │   ├── streamlit_app.py             # abas de lote, individual e documentação
 │   ├── requirements.txt
+│   ├── exemplo_turma.csv            # 18 alunos para testar
 │   ├── README.md
 │   └── artifacts/modelo_risco.joblib
 │
 ├── reports/
+│   ├── deck_gerencial.pptx
 │   ├── figures/
-│   └── *.csv                        # coeficientes, drift e deslocamento
+│   └── *.csv                        # coeficientes, drift, shift
 │
 └── docs/
-    ├── decisoes_tecnicas.md         # registro de decisões e revisões
-    └── quadro_hipoteses.csv         # 20 hipóteses com seus vereditos
+    ├── decisoes_tecnicas.md         # o que decidimos e o que mudamos de ideia
+    └── quadro_hipoteses.csv         # 20 hipóteses com veredito
 ```
-Decisões metodológicas
 
-Durante o desenvolvimento do projeto, tomei algumas decisões para garantir que o modelo fosse confiável e que os resultados refletissem o comportamento real dos dados.
+---
 
-**Prevenção de vazamento de dados (data leakage).**
-Algumas variáveis da base são derivadas umas das outras. A sequência **Fase → Fase Ideal → Defasagem → IAN → INDE → Pedra** é determinística, ou seja, conhecer uma delas praticamente revela as demais. Por esse motivo, não utilizei **IAN**, **INDE** e **Pedra** como variáveis preditoras. Além disso, implementei uma validação no módulo `src/features/build.py` que interrompe a execução caso alguma dessas variáveis seja utilizada ou caso qualquer variável apresente correlação superior a 0,9 com a variável alvo.
+## Decisões que valem explicar
 
-**Padronização do IPS por ano.**
-Ao analisar o IPS, observei uma mudança significativa entre os anos. Na coorte fechada, o indicador varia de **7,50 para 5,00** e depois retorna para **7,51**, mesmo com praticamente os mesmos alunos. Isso indica que a alteração ocorreu na forma de cálculo do indicador e não no perfil da população. Para reduzir esse efeito, utilizei o IPS em formato de **percentil dentro de cada ano**, tornando a comparação menos sensível às mudanças de escala.
+Vazamento. A cadeia `Fase + Fase Ideal` leva a `Defasagem`, que leva a
+`IAN`, que compõe o `INDE` e vira `Pedra`. Tudo determinístico. Por isso IAN,
+INDE e Pedra estão proibidos como preditores, e o `src/features/build.py`
+levanta erro se algum entrar ou se qualquer variável passar de 0,9 de
+correlação com o alvo. A maior que encontramos foi 0,308.
 
-**Tratamento dos valores iguais a zero.**
-Cada indicador foi tratado de acordo com seu comportamento na base. No caso do **IAA**, existe uma lacuna na distribuição entre **0 e 1,7**, e os valores iguais a zero não permanecem ao longo dos anos, indicando que provavelmente representam ausência de resposta. Por isso, esses registros foram convertidos para valores ausentes. Já os indicadores **IEG** e **IDA** apresentam distribuição contínua, e seus valores iguais a zero representam observações válidas, sendo mantidos na base.
+Percentil dentro de cada ano. O IPS vai de 7,50 para 5,00 e volta para
+7,51 na corte fechada, com a mesma população. Isso é mudança no jeito de
+calcular, não nos alunos. Usando percentil, o modelo fica imune a esse tipo de
+deslocamento.
 
-**Não utilização de SMOTE.**
-Optei por não utilizar técnicas de sobreamostragem, como o SMOTE. Embora apenas **17,3% das transições** correspondam ao evento de interesse, essa proporção ainda é suficiente para o treinamento do modelo. Além disso, como o objetivo é prever probabilidades, a criação de exemplos sintéticos poderia alterar a distribuição real dos dados e prejudicar a calibração do modelo.
+Zeros tratados caso a caso. No IAA existe uma lacuna na distribuição, sem
+nenhum valor entre 0 e 1,7, e os zeros não persistem de um ano para o outro.
+Isso é cara de não resposta, então viraram nulo. Já IEG e IDA têm distribuição
+contínua e o zero ali é medida real, então ficaram como estão. A regra uniforme
+que pensamos no começo teria jogado fora informação boa.
 
-**Validação da integridade dos dados.**
-Também desenvolvi um módulo de validação (`src/data/validate.py`) para verificar automaticamente a integridade da base antes do treinamento. Esse módulo valida a unicidade das chaves, a consistência da defasagem, os limites esperados para cada indicador e a cobertura dos dados por ano. Todos esses testes foram executados utilizando cenários de corrupção proposital dos dados e identificaram corretamente as inconsistências inseridas.
+Sem SMOTE. Com 17,3% de eventos o problema não é falta de casos positivos,
+é calibração. Casos sintéticos distorceriam justamente a probabilidade que
+precisamos preservar.
 
-Limitações
+Contratos de integridade. O `src/data/validate.py` confere chave única,
+a invariante da defasagem, as faixas dos indicadores e a cobertura por ano.
+Testamos cada um contra corrupção injetada de propósito, e todos falharam como
+deveriam.
 
-Este trabalho também apresenta algumas limitações que devem ser consideradas na interpretação dos resultados.
+---
 
-O modelo desenvolvido prevê o **agravamento da defasagem** conforme ela é definida na base de dados. Como essa defasagem representa principalmente um descompasso entre a fase do aluno e a fase considerada ideal pelo programa, o modelo não deve ser interpretado como um preditor direto do desempenho pedagógico.
+## O que estes dados não permitem afirmar
 
-A análise foi realizada apenas com os alunos que permaneceram na base de dados. Como entre **25% e 30% dos estudantes deixam o programa a cada ano**, os resultados não necessariamente representam toda a população atendida pela instituição.
+- Nada aqui é causal. A base não tem grupo de controle.
+- A análise longitudinal só enxerga quem ficou. Entre 25% e 30% saem por ano.
+- Não dá para separar não promoção pedagógica de administrativa.
+- O IPP ficou de fora porque não existe em 2022. Testei e ele não faria
+  diferença sobre o conjunto das variáveis.
+- O modelo mede descompasso de calendário, não desempenho pedagógico.
+- A régua de Fase Ideal mudou entre 2022 e 2023, quando ALFA passou de
+  "2º e 3º ano" para "1º e 2º ano". Isso invalida comparar nível absoluto
+  entre esses dois anos.
 
-Outra limitação é que os dados não permitem identificar se um aluno deixou de avançar por motivos pedagógicos ou administrativos. Dessa forma, não foi possível separar essas duas situações durante a análise.
+---
 
-O indicador **IPP** não foi utilizado na modelagem porque não está disponível para o ano de 2022. Testes adicionais mostraram que sua inclusão não alteraria de forma significativa o desempenho do modelo quando consideradas as demais variáveis disponíveis.
+## O que recomendamos
 
-Além disso, os resultados obtidos mostram **associações estatísticas**, e não relações de causa e efeito. Como não existe um grupo de controle, não é possível afirmar que as mudanças observadas foram causadas exclusivamente pelo programa.
+| # | Recomendação | Por quê | Custo |
+|---|---|---|---|
+| 1 | Criar alerta de evasão por queda de engajamento | O sinal é forte e usa dado que já é coletado | Baixo |
+| 2 | Fazer busca ativa no quintil de baixo | O aluno em dificuldade não se percebe em dificuldade | Médio |
+| 3 | Padronizar o cálculo do IPS | A escala mudou entre ciclos sem a população mudar | Baixo |
+| 4 | Revisar como as fases acompanham o ano escolar | Origem de 98,7% dos agravamentos medidos | Alto |
+| 5 | Entender por que os alunos Quartzo recuperam menos | Contraria a missão de atender quem mais precisa | Médio |
 
-Por fim, houve uma alteração na definição da **Fase Ideal** entre 2022 e 2023. Nesse período, a fase **ALFA** passou de "2º e 3º ano" para "1º e 2º ano", tornando inadequadas comparações diretas dos níveis absolutos entre esses dois anos. Por esse motivo, essa mudança foi considerada durante toda a análise.
+---
 
+## Sobre os dados
+
+Os dados vieram da Associação Passos Mágicos para o Datathon da FIAP e estão
+anonimizados. Não são versionados aqui, conforme o `.gitignore`.
+
+O mapeamento real está no
+`src/data/load.py`.
