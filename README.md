@@ -6,7 +6,7 @@ com modelo preditivo de risco e uma aplicação.
 
 **1.661 alunos, 3.030 observações aluno/ano, 1.365 transições.**
 
-**Aplicação publicada:** _(colar aqui a URL do Streamlit Cloud)_
+**Aplicação publicada:** _(https://datathonfiap2026-4lubiyv3dzudlpin7efktm.streamlit.app/)_
 
 ---
 
