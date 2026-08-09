@@ -304,14 +304,19 @@ with aba1:
             "da média na fase inicial.",
             icon="💡",
         )
-        # Sem background_gradient: ele exige matplotlib, que nao esta no
-        # requirements do app e falha no Community Cloud. A coluna de
-        # classificacao ja comunica a urgencia sem depender de cor.
-        st.dataframe(
-            out.style.format({"risco": "{:.1%}"}),
-            use_container_width=True, hide_index=True)
-        st.download_button("⬇️ Baixar lista priorizada",
-                           out.to_csv(index=False).encode("utf-8-sig"),
+        # Sem Styler: background_gradient exige matplotlib, ausente no
+        # Community Cloud, e o proprio Styler adiciona um ponto de falha
+        # que nao compensa. A coluna de classificacao ja comunica urgencia.
+        # O CSV baixado mantem o risco numerico para uso em planilha.
+        csv_saida = out.to_csv(index=False).encode("utf-8-sig")
+        exibir = out.copy()
+        exibir["risco"] = (exibir["risco"] * 100).round(1).astype(str) + "%"
+        exibir = exibir.rename(columns={
+            "prioridade": "Prioridade", "risco": "Risco",
+            "defasagem": "Defasagem", "grupo": "Grupo",
+            "classificacao": "Classificação"})
+        st.dataframe(exibir, use_container_width=True, hide_index=True)
+        st.download_button("⬇️ Baixar lista priorizada", csv_saida,
                            "priorizacao_risco.csv", "text/csv")
 
 # ---- Consulta individual -------------------------------------------------
@@ -399,11 +404,17 @@ testado com as transições de 2023 para 2024. Nenhum dado do período de teste
 participou do treinamento e nenhum aluno aparece simultaneamente nos dois
 lados de uma mesma etapa de validação.
 
+As métricas acima vêm dessa validação. O modelo publicado aqui foi retreinado
+com todos os dados disponíveis, o que é prática usual em produção, mas
+significa que os números descrevem o desempenho medido e não exatamente esta
+versão.
+
 **Algoritmo.** Regressão logística com regularização. A escolha considerou
-também Random Forest, XGBoost e LightGBM. A regressão logística foi
-selecionada porque produz probabilidades calibradas, requisito para uso em
-decisões reais, e porque apresentou melhor desempenho no grupo de fase
-avançada, no qual a previsão é mais difícil.
+também Random Forest, XGBoost e LightGBM. Os modelos empatam dentro do
+intervalo de confiança, e o critério de desempate, definido antes da
+comparação, foi ficar com o mais simples e mais bem calibrado. A regressão
+logística atende aos dois, e produzir probabilidade confiável é requisito para
+uso em decisão real.
 
 **Fatores mais influentes.** A defasagem atual é o fator de maior peso, por
 efeito de piso: alunos próximos do nível ideal têm mais margem para regredir.
@@ -418,6 +429,10 @@ de agravamento.
 - Não é possível distinguir a não promoção pedagógica da administrativa.
 - Os resultados são associativos e não causais, pois a base não possui grupo
   de controle.
+- O IPV, que aparece como principal fator de proteção, é também o melhor
+  preditor isolado da promoção de fase. Se a coordenação usa esse indicador ao
+  decidir promoções, parte da previsão é circular. Não é possível verificar com
+  os dados disponíveis.
 - A ferramenta destina-se à priorização de atendimento e não ao diagnóstico
   individual. A decisão sobre cada aluno cabe à equipe pedagógica.
 """)

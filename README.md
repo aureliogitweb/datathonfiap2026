@@ -2,11 +2,12 @@
 
 Análise de três ciclos da Pesquisa Extensiva do Desenvolvimento Educacional
 (PEDE 2022 a 2024) da [Associação Passos Mágicos](https://passosmagicos.org.br/),
-com modelo preditivo de risco e uma aplicação.
+com modelo preditivo de risco e uma aplicação para a equipe pedagógica usar no
+dia a dia.
 
 **1.661 alunos, 3.030 observações aluno/ano, 1.365 transições.**
 
-**Aplicação publicada:** _(https://datathonfiap2026-4lubiyv3dzudlpin7efktm.streamlit.app/)_
+**Aplicação publicada:** _(colar aqui a URL do Streamlit Cloud)_
 
 ---
 
@@ -18,12 +19,18 @@ Entre os 468 alunos presentes nos três anos, a proporção em nível adequado
 dobrou: passou de 32,7% para 65,2%. Olhando aluno por aluno, 58,8% melhoraram
 e 10,3% pioraram.
 
-O que torna isso defensável não é o número em si, mas o que ele resiste.
-Apliquei os limites de Manski, ou seja, refiz a conta assumindo que
-todos os 509 alunos que saíram do programa tivessem piorado. Mesmo nesse
-cenário impossível de ser pior, a melhora entre ciclos continua em 9,4 pontos,
-contra 10,1 observados. O piso do segundo ciclo (30,9%) já supera o resultado
-efetivo do primeiro (30,8%).
+O teste de Wilcoxon pareado dá p = 7,5e-35. Isso é medição direta dentro da
+coorte, sem precisar estimar nada sobre quem saiu.
+
+A comparação **entre ciclos** é mais delicada. A taxa de melhora sobe de 30,8%
+para 40,9%, mas só enxergamos quem ficou. Aplicando limites de Manski a cada
+janela isoladamente, o intervalo é [21,5%; 51,7%] em 2022 para 2023 e
+[30,9%; 55,4%] em 2023 para 2024. Como esses intervalos se sobrepõem, os dados
+sozinhos **não** provam que o segundo ciclo foi melhor que o primeiro.
+
+O que sustenta a comparação é a atrição ter sido parecida nos dois anos, 30,2%
+e 24,6%. É uma suposição razoável, não uma garantia, e preferimos declarar isso
+a vender uma robustez que a base não entrega.
 
 ### 2. O IAN não mede o que o nome sugere
 
@@ -58,19 +65,25 @@ ajuda nunca vai alcançar o quintil de baixo. A busca precisa ser ativa.
 Entre 25% e 30% dos alunos saem por ano. Em todo o painel, só 4 voltaram
 depois de sumir. Na prática, quem sai não volta.
 
-| Indicador | Prediz evasão | Prediz defasagem |
+| Indicador | Associação com evasão | Prediz defasagem |
 |---|---|---|
-| IEG (engajamento) | p = 7e-14, o mais forte de todos | AUC 0,523, ou seja, nada |
+| IEG (engajamento) | p = 7e-14, a mais forte de todas | AUC 0,523, ou seja, nada |
 
 São dois problemas diferentes e cada um precisa do seu próprio alerta. O
 enunciado pede só o segundo, que por acaso é o de sinal mais fraco.
 
+**Duas ressalvas.** A comparação é univariada, sem controlar fase, idade ou
+tempo de programa, então não construímos um modelo de evasão de fato. E a Fase
+8 corresponde ao ensino superior, onde sair pode significar concluir o
+programa, não abandoná-lo. Um modelo de evasão precisaria excluir as fases
+terminais.
+
 ### 5. O programa beneficia mais quem já estava melhor
 
 Partindo da mesma defasagem inicial de -2, alunos Ametista avançam 1,35 fase e
-alunos Quartzo avançam 0,30.
+alunos Quartzo avançam 0,30. É o efeito Mateus.
 
-Estou reportando como indício, não como conclusão fechada, porque são só 10 alunos
+Reportamos como indício, não como conclusão fechada, porque são só 10 alunos
 Quartzo nesse recorte. Mas se confirmar, é o achado mais importante para o
 desenho do programa, já que contraria a missão de atender quem está em maior
 vulnerabilidade.
@@ -79,12 +92,12 @@ vulnerabilidade.
 
 ## O modelo
 
-O que ele prevê: `defasagem(t+1) < defasagem(t)`, ou seja, se a defasagem
+**O que ele prevê:** `defasagem(t+1) < defasagem(t)`, ou seja, se a defasagem
 do aluno vai piorar no ciclo seguinte. Acontece em 17,3% das transições, e a
 taxa é idêntica nas duas janelas, o que é importante para a validação fazer
 sentido.
 
-Como validamos: treinamos com as transições de 2022 para 2023 e testamos
+**Como validamos:** treinamos com as transições de 2022 para 2023 e testamos
 com as de 2023 para 2024. No ajuste de hiperparâmetros usamos GroupKFold por
 RA, porque 468 alunos aparecem nas duas janelas e um sorteio aleatório
 colocaria o mesmo aluno dos dois lados.
@@ -98,27 +111,40 @@ colocaria o mesmo aluno dos dois lados.
 | Árvore de decisão | 0,410 | [0,352; 0,482] | 0,125 | 0,181 |
 | Regra simples (só a fase) | 0,363 | [0,313; 0,422] | 0,116 | 0,084 |
 
-Por que a logística, se o Random Forest tem PR-AUC maior? Porque o número
-global engana. A taxa de eventos é 48,0% na fase inicial e 8,4% na avançada, e
-só separar esses dois grupos já produz PR-AUC alto sem prever nada de fato. No
-estrato de fase avançada, onde a regra de fase não ajuda e o modelo precisa
-trabalhar, a ordem se inverte e a logística lidera com 0,326.
+**Por que a logística, se o Random Forest tem PR-AUC maior?** Primeiro, porque
+o número global engana. A taxa de eventos na janela de teste é 48,0% na fase
+inicial e 8,4% na avançada (na base completa, que é a referência usada pelo
+app, são 46,2% e 9,2%), e só separar esses dois grupos já produz PR-AUC alto sem prever nada
+de fato. No estrato de fase avançada, onde o modelo precisa realmente
+trabalhar, os números ficam 0,326 para a logística e 0,262 para o Random
+Forest.
 
-Como os intervalos de confiança se sobrepõem, valeu o critério que acabei definindo
-antes de rodar: em empate estatístico, fica o mais simples e mais bem
-calibrado.
+Mas seria desonesto chamar isso de vitória. A diferença pareada é +0,057, com
+IC 95% de [-0,043; +0,157] e p = 0,25. **Os modelos empatam.** O que decidiu foi
+o critério que definimos antes de rodar: em empate estatístico, fica o mais
+simples e mais bem calibrado. A logística atende aos dois.
 
-Calibração. Brier de 0,107, com o previsto batendo com o observado em todos
+**Calibração.** Brier de 0,107, com o previsto batendo com o observado em todos
 os quintis. Quando o modelo diz 30%, cerca de 30% realmente agravam. Isso
 importa porque o enunciado pede probabilidade, e a aplicação mostra um
 percentual para quem vai decidir onde colocar recurso.
 
-Ganho na prática. No estrato de fase avançada, olhando os 30 alunos de
-maior risco, o modelo captura 22,0% dos casos contra 6,0% da regra simples.
-São 3,7 vezes mais acertos com a mesma capacidade de atendimento.
+**Ganho na prática.** No estrato de fase avançada, entre os 30 alunos de maior
+risco, o modelo captura 11 dos 50 casos reais, contra 3 da regra simples. São
+oito alunos de diferença com a mesma capacidade de atendimento. O número é
+pequeno em termos absolutos, então tratamos como indicação de ganho, não como
+medida precisa.
 
-O que mais protege é o IPV, com razão de chances de 0,46. Entre as coisas
+**O que mais protege:** o IPV, com razão de chances de 0,46. Entre as coisas
 que a instituição pode influenciar, é a de maior efeito.
+
+**Uma ressalva importante sobre o IPV.** Ele é também o melhor preditor
+isolado da promoção de fase (AUC 0,679), que é justamente a decisão que gera o
+alvo. Não sabemos como o IPV é calculado nem se a coordenação o consulta ao
+decidir promoções. Se consultar, o modelo estaria em parte reproduzindo uma
+decisão que a instituição já toma olhando para a mesma variável. Não dá para
+resolver isso com os dados disponíveis, e é a limitação mais séria do
+modelo.
 
 ---
 
@@ -143,11 +169,10 @@ a aplicação usa.
 streamlit run app/streamlit_app.py
 ```
 
-Para testar o modo em lote sem montar planilha, envie o `app/exemplo_turma.csv`. 
-Há um arquivo gerado de exemplo nessa pasta, pode utilizar ele se quiser.
+Para testar o modo em lote sem montar planilha, envie o `app/exemplo_turma.csv`.
 São 18 alunos fictícios com risco entre 0,8% e 47,3%.
 
-Com anaconda: `conda env create -f environment.yml && conda activate passos-datathon`
+Com conda: `conda env create -f environment.yml && conda activate passos-datathon`
 
 ---
 
@@ -204,28 +229,28 @@ passos-magicos-datathon/
 
 ## Decisões que valem explicar
 
-Vazamento. A cadeia `Fase + Fase Ideal` leva a `Defasagem`, que leva a
+**Vazamento.** A cadeia `Fase + Fase Ideal` leva a `Defasagem`, que leva a
 `IAN`, que compõe o `INDE` e vira `Pedra`. Tudo determinístico. Por isso IAN,
 INDE e Pedra estão proibidos como preditores, e o `src/features/build.py`
 levanta erro se algum entrar ou se qualquer variável passar de 0,9 de
 correlação com o alvo. A maior que encontramos foi 0,308.
 
-Percentil dentro de cada ano. O IPS vai de 7,50 para 5,00 e volta para
-7,51 na corte fechada, com a mesma população. Isso é mudança no jeito de
+**Percentil dentro de cada ano.** O IPS vai de 7,50 para 5,00 e volta para
+7,51 na coorte fechada, com a mesma população. Isso é mudança no jeito de
 calcular, não nos alunos. Usando percentil, o modelo fica imune a esse tipo de
 deslocamento.
 
-Zeros tratados caso a caso. No IAA existe uma lacuna na distribuição, sem
+**Zeros tratados caso a caso.** No IAA existe uma lacuna na distribuição, sem
 nenhum valor entre 0 e 1,7, e os zeros não persistem de um ano para o outro.
 Isso é cara de não resposta, então viraram nulo. Já IEG e IDA têm distribuição
 contínua e o zero ali é medida real, então ficaram como estão. A regra uniforme
 que pensamos no começo teria jogado fora informação boa.
 
-Sem SMOTE. Com 17,3% de eventos o problema não é falta de casos positivos,
+**Sem SMOTE.** Com 17,3% de eventos o problema não é falta de casos positivos,
 é calibração. Casos sintéticos distorceriam justamente a probabilidade que
 precisamos preservar.
 
-Contratos de integridade. O `src/data/validate.py` confere chave única,
+**Contratos de integridade.** O `src/data/validate.py` confere chave única,
 a invariante da defasagem, as faixas dos indicadores e a cobertura por ano.
 Testamos cada um contra corrupção injetada de propósito, e todos falharam como
 deveriam.
@@ -237,9 +262,18 @@ deveriam.
 - Nada aqui é causal. A base não tem grupo de controle.
 - A análise longitudinal só enxerga quem ficou. Entre 25% e 30% saem por ano.
 - Não dá para separar não promoção pedagógica de administrativa.
-- O IPP ficou de fora porque não existe em 2022. Testei e ele não faria
-  diferença sobre o conjunto das variáveis.
+- O IPP ficou de fora porque não existe em 2022. Testamos e ele não faria
+  diferença sobre o conjunto completo de variáveis.
 - O modelo mede descompasso de calendário, não desempenho pedagógico.
+- O IPV pode ser usado pela própria instituição na decisão de promoção, o que
+  tornaria parte da previsão circular. Não temos como verificar.
+- Onze das treze variáveis agregam pouco: só `defasagem` e `fase_ideal` já
+  entregam 0,264 de PR-AUC no estrato avançada, contra 0,327 do conjunto
+  completo. O fenômeno é majoritariamente estrutural.
+- As métricas relatadas vêm do modelo treinado apenas em 2022 para 2023. O
+  modelo publicado foi retreinado com todos os dados, prática usual em
+  produção, mas isso significa que os números acima descrevem a validação e
+  não exatamente o modelo em uso.
 - A régua de Fase Ideal mudou entre 2022 e 2023, quando ALFA passou de
   "2º e 3º ano" para "1º e 2º ano". Isso invalida comparar nível absoluto
   entre esses dois anos.
@@ -260,8 +294,18 @@ deveriam.
 
 ## Sobre os dados
 
-Os dados vieram da Associação Passos Mágicos para o Datathon da FIAP e estão
+Os dados vieram da Associação Passos Mágicos para o Datathon PosTech e estão
 anonimizados. Não são versionados aqui, conforme o `.gitignore`.
 
-O mapeamento real está no
+Uma observação útil: o dicionário oficial descreve o conjunto de 2020 a 2022,
+com nomes longos tipo `INDE_2022`, enquanto a base que recebemos vai de 2022 a
+2024 e usa nomes curtos como `INDE 22` e `Defas`. Ele serve como referência
+conceitual dos indicadores, mas não como esquema. O mapeamento real está no
 `src/data/load.py`.
+
+---
+
+## Licença
+
+Código sob licença MIT, no arquivo [LICENSE](LICENSE). Os dados não entram
+nessa licença e pertencem à Associação Passos Mágicos.
