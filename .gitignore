@@ -32,5 +32,5 @@ Thumbs.db
 # Streamlit — segredos nunca vao para o repo
 .streamlit/secrets.toml
 
-# Excecao: o artefato do modelo PRECISA ir (3.8 KB, sem dado individual)
+# Excecao: o artefato do modelo precisa ir.
 !app/artifacts/modelo_risco.joblib
