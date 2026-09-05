@@ -172,8 +172,7 @@ cd passos-magicos-datathon
 python -m venv .venv \&\& source .venv/bin/activate   # Windows: .venv\\Scripts\\activate
 pip install -r requirements.txt
 
-# coloque a planilha PEDE em data/raw/. O nome não importa, porque o
-# carregador acha qualquer .xlsx que estiver na pasta.
+# coloque a planilha PEDE em data/raw/. o carregador vai achar qualquer .xlsx que estiver na pasta.
 jupyter lab
 ```
 
@@ -187,7 +186,7 @@ streamlit run app/streamlit\_app.py
 Para testar o modo em lote sem montar planilha, envie o `app/exemplo\_turma.csv`.
 São 18 alunos fictícios com risco entre 0,8% e 47,3%.
 
-Com conda: `conda env create -f environment.yml \&\& conda activate passos-datathon`
+conda: `conda env create -f environment.yml \&\& conda activate passos-datathon`
 
 \---
 
@@ -199,24 +198,24 @@ passos-magicos-datathon/
 ├── LICENSE
 ├── requirements.txt
 ├── environment.yml
-├── config.yaml                      # semente, caminhos e faixas de validação
+├── config.yaml                      # seed, caminhos e faixas de validação
 ├── .gitignore
 │
 ├── data/
-│   ├── raw/                         # planilha original (não versionada)
+│   ├── raw/                         # planilha original disponibilizada (não versionada)
 │   ├── interim/                     # painel limpo e log de limpeza
 │   └── processed/
 │
 ├── notebooks/
-│   ├── 01\_qualidade\_dados.ipynb     # auditoria: drift, zeros, contratos
-│   ├── 02\_eda\_perguntas.ipynb       # as 11 perguntas do enunciado
-│   └── 03\_modelo\_risco.ipynb        # entregável do modelo
+│   ├── 01\_qualidade\_dados.ipynb     # auditoria
+│   ├── 02\_eda\_perguntas.ipynb       # 11 perguntas do trabalho
+│   └── 03\_modelo\_risco.ipynb        # Modelo entregue
 │
 ├── src/
 │   ├── data/
-│   │   ├── load.py                  # junta as 3 abas num painel longo
-│   │   ├── clean.py                 # limpeza com log auditável
-│   │   └── validate.py              # contratos que falham cedo
+│   │   ├── load.py                  # junta as 3 abas num painel
+│   │   ├── clean.py                 # limpeza com log.
+│   │   └── validate.py              # contratos que falham.
 │   ├── features/build.py            # variáveis e verificação de vazamento
 │   ├── models/
 │   │   ├── train.py                 # pipelines dos cinco modelos
@@ -224,9 +223,9 @@ passos-magicos-datathon/
 │   └── analysis/eda\_tecnica.py      # drift, VIF, shift, fluxo do painel
 │
 ├── app/
-│   ├── streamlit\_app.py             # abas de lote, individual e documentação
+│   ├── streamlit\_app.py             # abas lote.
 │   ├── requirements.txt
-│   ├── exemplo\_turma.csv            # 18 alunos para testar
+│   ├── exemplo\_turma.csv            # 18 alunos para teste
 │   ├── README.md
 │   └── artifacts/modelo\_risco.joblib
 │
@@ -236,76 +235,35 @@ passos-magicos-datathon/
 │   └── \*.csv                        # coeficientes, drift, shift
 │
 └── docs/
-    ├── decisoes\_tecnicas.md         # o que decidimos e o que mudamos de ideia
+    ├── decisoes\_tecnicas.md         # o que decidi e o que mudei de ideia
     └── quadro\_hipoteses.csv         # 20 hipóteses com veredito
 ```
 
 \---
 
-## Decisões que valem explicar
+# Explicação das decisões tomadas...
 
-Vazamento. A cadeia `Fase + Fase Ideal` leva a `Defasagem`, que leva a
-`IAN`, que compõe o `INDE` e vira `Pedra`. Tudo determinístico. Por isso IAN,
-INDE e Pedra estão proibidos como preditores, e o `src/features/build.py`
-levanta erro se algum entrar ou se qualquer variável passar de 0,9 de
-correlação com o alvo. A maior que encontramos foi 0,308.
+**Vazamento** A cadeia `Fase + Fase Ideal` leva a `Defasagem`, que leva a `IAN`, que compõe o `INDE` e vira `Pedra`. Tudo determinístico. Por isso deixei IAN, INDE e Pedra proibidos como preditores, e o `src/features/build.py` levanta erro se algum deles entrar ou se qualquer variável passar de 0,9 de correlação com o alvo. A maior que encontrei foi 0,308.
 
-Percentil dentro de cada ano. O IPS vai de 7,50 para 5,00 e volta para
-7,51 na coorte fechada, com a mesma população. Isso é mudança no jeito de
-calcular, não nos alunos. Usando percentil, o modelo fica imune a esse tipo de
-deslocamento.
+**Percentil dentro de cada ano** O IPS vai de 7,50 para 5,00 e volta para 7,51 na coorte fechada, com a mesma população. Isso é mudança no jeito de calcular, não nos alunos. Usando percentil, o modelo fica imune a esse tipo de deslocamento.
 
-Zeros tratados caso a caso. No IAA existe uma lacuna na distribuição, sem
-nenhum valor entre 0 e 1,7, e os zeros não persistem de um ano para o outro.
-Isso é cara de não resposta, então viraram nulo. Já IEG e IDA têm distribuição
-contínua e o zero ali é medida real, então ficaram como estão. A regra uniforme
-que pensamos no começo teria jogado fora informação boa.
+**Zeros tratados caso a caso** No IAA existe uma lacuna na distribuição, sem nenhum valor entre 0 e 1,7, e os zeros não persistem de um ano para o outro. Tem cara de não resposta, então converti para nulo. Já IEG e IDA têm distribuição contínua e ali o zero é medida real então mantive.
 
-Sem SMOTE. Com 17,3% de eventos o problema não é falta de casos positivos,
-é calibração. Casos sintéticos distorceriam justamente a probabilidade que
-precisamos preservar.
+*Sem SMOTE* Com 17,3% de eventos o problema não é falta de casos positivos, é calibração. Casos sintéticos distorceriam justamente a probabilidade que eu preciso preservar.
 
-Contratos de integridade. O `src/data/validate.py` confere chave única,
-a invariante da defasagem, as faixas dos indicadores e a cobertura por ano.
-Testamos cada um contra corrupção injetada de propósito, e todos falharam como
-deveriam.
+**integridade** O `src/data/validate.py` confere chave única, a invariante da defasagem, as faixas dos indicadores e a cobertura por ano. Testei cada um contra corrupção injetada de propósito, e todos falharam como deveriam.
 
-\---
+---
 
 ## O que estes dados não permitem afirmar
 
-* Nada aqui é causal. A base não tem grupo de controle.
-* A análise longitudinal só enxerga quem ficou. Entre 25% e 30% saem por ano.
-* Não dá para separar não promoção pedagógica de administrativa.
-* O IPP ficou de fora porque não existe em 2022. Testamos e ele não faria
-diferença sobre o conjunto completo de variáveis.
-* O modelo mede descompasso de calendário, não desempenho pedagógico.
-* O IPV pode ser usado pela própria instituição na decisão de promoção, o que
-tornaria parte da previsão circular. Não temos como verificar.
-* Onze das treze variáveis agregam pouco: só `defasagem` e `fase\_ideal` já
-entregam 0,264 de PR-AUC no estrato avançada, contra 0,327 do conjunto
-completo. O fenômeno é majoritariamente estrutural.
-* As métricas relatadas vêm do modelo treinado apenas em 2022 para 2023. O
-modelo publicado foi retreinado com todos os dados, prática usual em
-produção, mas isso significa que os números acima descrevem a validação e
-não exatamente o modelo em uso.
-* A régua de Fase Ideal mudou entre 2022 e 2023, quando ALFA passou de
-"2º e 3º ano" para "1º e 2º ano". Isso invalida comparar nível absoluto
-entre esses dois anos.
+1° A base não tem grupo de controle.
+2° A análise longitudinal só enxerga quem ficou. Entre 25% e 30% saem por ano.
+3° Não dá para separar não promoção pedagógica de administrativa.
+4° O IPP ficou de fora porque não existe em 2022. Testei e ele não faria diferença sobre o conjunto completo de variáveis.
+5° O modelo mede descompasso de calendário, não desempenho pedagógico.
+6° O IPV pode ser usado pela própria instituição na hora de decidir a promoção, o que tornaria parte da previsão circular.
+7° Onze das treze variáveis pouco agregam. Só `defasagem` e `fase_ideal` já entregam 0,264 de PR-AUC no estrato avançada, contra 0,327 do conjunto completo. O fenômeno é majoritariamente estrutural.
+8° As métricas relatadas vêm do modelo treinado apenas em 2022 para 2023. O modelo publicado foi retreinado com todos os dados.
 
-\---
-
-## O que recomendo
-
-|#|Recomendação|Por quê|Custo|
-|-|-|-|-|
-|1|Criar alerta de evasão por queda de engajamento|O sinal é forte e usa dado que já é coletado|Baixo|
-|2|Fazer busca ativa no quintil de baixo|O aluno em dificuldade não se percebe em dificuldade|Médio|
-|3|Padronizar o cálculo do IPS|A escala mudou entre ciclos sem a população mudar|Baixo|
-|4|Revisar como as fases acompanham o ano escolar|Origem de 98,7% dos agravamentos medidos|Alto|
-|5|Entender por que os alunos Quartzo recuperam menos|Contraria a missão de atender quem mais precisa|Médio|
-
-\---
-
-## 
-
+---
