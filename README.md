@@ -249,3 +249,24 @@ passos-magicos-datathon/
 8° As métricas relatadas vêm do modelo treinado apenas em 2022 para 2023. O modelo publicado foi retreinado com todos os dados.
 
 ---
+
+# Erros que cometi e corrigi
+
+O parser comeu uma casa decimal. O INDE de 2024 vinha como texto, e minha
+regra de separador de milhar removia o ponto de `8.337`, virando `8337`. A média
+do ano foi para 15. Só apareceu porque a validação olha distribuição, não só
+estrutura da tabela.
+
+O `class_weight='balanced'` destruiu a calibração. Ele melhora o ranking, mas
+o modelo passou a prever 0,839 onde o real era 0,464. Como o enunciado pede
+probabilidade e não ordenação, tirei.
+
+Errei a aplicação dos limites de Manski. Na primeira versão eu subtraía
+limite inferior de limite inferior, o que não é um limite válido para diferença.
+Descobri numa auditoria que fiz no fim do projeto, revisando tudo como se fosse
+outra pessoa avaliando. A conclusão mudou e o texto foi reescrito.
+
+**Uma variável que eu tinha certeza que ia funcionar, não funcionou.** Criei uma
+medida de idade relativa à fase ideal achando que capturaria o ciclo da régua.
+AUC de 0,516, ou seja, nada. Mantive no conjunto porque sim, mas registrei
+que a expectativa não se confirmou.
